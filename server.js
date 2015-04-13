@@ -8,7 +8,7 @@ http.createServer(onRequest).listen(3050);
 function onRequest(client_req, client_res) {
   var uri = url.parse(client_req.url).pathname;
   console.log('serve: ' + uri);
-  
+
   if (uri === '/fred') {
 
     key = require('./fred-key.json');
@@ -31,6 +31,9 @@ function onRequest(client_req, client_res) {
     });
   }
   else {
+    if (uri === '/') {
+      uri = '/us-leading-index.html';
+    }
     var filename = path.join(process.cwd(), uri);
     fs.exists(filename, function(exists) {
         if(!exists) {
