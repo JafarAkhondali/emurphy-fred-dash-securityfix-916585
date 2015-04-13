@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet/less" type="text/css" href="../metro.css/less/metroblog.less" />
+    <style>
+    .axis {
+        font: 0.7em arial;
+    }
+    path {
+        fill:none;
+        stroke:black;
+        stroke-width:2px;
+    }
+    .tick {
+        fill:none;
+        stroke:black;
+    }
+    .line {
+        stroke:steelblue;
+        opacity:50;
+    }
+     
+    </style>
+    <script src="http://mbostock.github.com/d3/d3.js?2.3.0"></script>
+    <title>FRED Leading Index for the United States</title>
+</head>
+<body>
+        <header><h1>FRED Leading Index for the United States</h1></header>
+        <p>The leading index for each state predicts the six-month growth rate of the state's coincident index. In addition to the coincident index, the models include other variables that lead the economy: state-level housing permits (1 to 4 units), state initial unemployment insurance claims, delivery times from the Institute for Supply Management (ISM) manufacturing survey, and the interest rate spread between the 10-year Treasury bond and the 3-month Treasury bill. From <a href="http://research.stlouisfed.org/fred2/series/USSLIND">St. Louis Fed FRED</a> 
+        <p/>
+
+        <br>    
+        <script>
+            var margin = 50,
+                width = 700 - margin,
+                height = 300 - margin;
+            
+            var parse = d3.time.format("%Y-%m-%d").parse;                
+            
+            var freddata;
+            
+            getData();
+            
+            function draw(data) {
+                data.forEach(function(d) {
+                    d.date = parse(d.date);
+                });
+            
+                var y= d3.scale.linear()
+                    .domain(d3.extent(data,function (d) {return parseFloat(d.value);}))
+                    .range([height,margin*2]);
+                
+                var x = d3.time.scale()
+                    .domain([data[0].date, data[data.length - 1].date])
+                    .range([margin,width]);
+    
+                var y_axis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left");
+    
+                var x_axis = d3.svg.axis()
+                    .scale(x);
+                                
+                var line = d3.svg.line()
+                    .x(function (d) {return x(d.date);})
+                    .y(function (d) {return y(d.value);});
+                
+                var zeroline = d3.svg.line()
+                    .x(function (d) {return x(d.date);})
+                    .y(function (d) {return y(0);});
+                                    
+                d3.select("svg")        
+                    .remove();
+
+                d3.select("body")
+                    .append("svg")
+                        .attr("class","chart")
+                        .attr("width", width+margin)
+                        .attr("height", height+margin);                
+                
+                var e = d3.select("svg");   
+                
+                e.append("path")
+                        .attr("class", "line");
+                    
+                function addpoints(k) {
+                    e.select("path")
+                    .attr("d", function() { return line(data.slice(0, k + 1)); });
+                };
+                
+                var k = 1, n = data.length, interval = Math.max(1,Math.round(n/50));
+                d3.timer(function() {
+                    addpoints(k);
+                    if ((k += interval) >= n - 1) {
+                        addpoints(n - 1);
+                        return true;
+                    }
+                });
+    
+                if (d3.min(data,function (d) {return parseFloat(d.value);}) < 0) {
+                     d3.select("svg")
+                        .append("path")
+                            .attr("class", "line")
+                            .style("stroke", "gray")
+                            .style("opacity", "60")
+                            .attr("d", zeroline(data));
+                }
+    
+                d3.select("svg")
+                    .append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    //.attr("transform", "translate(0," + (height + margin)/2 + ")")
+                    .call(x_axis);
+                
+                d3.select("svg")
+                    .append("g")
+                    .attr("class", "y axis")
+                    .attr("transform", "translate(" + margin + ",0)")
+                    .call(y_axis);
+                
+                d3.select('.y.axis')
+                    .append('text')
+                    //.text('Y Axis Label')
+                    .attr('transform', "rotate (90, " + -margin + ", 0)")
+                    .attr('x', 90)
+                    .attr('y', 0);   
+                
+                d3.select('svg')
+                    .append('text')
+                        .text('Source: Federal Reserve Bank of St. Louis')  
+                        .attr("transform", "translate(" + width / 1.6 + "," + (height + margin) + ")");
+        }
+        function getData() {
+            d3.json("http://localhost:3050/fred", function(data){
+                freddata = data.observations;
+                draw(freddata);                
+            });
+        }
+
+    </script>
+</body>
+</html>
