@@ -6,7 +6,13 @@ var http = require('http'),
 http.createServer(onRequest).listen(3050);
 
 function onRequest(client_req, client_res) {
-  var uri = url.parse(client_req.url).pathname;
+  var request = url.parse(client_req.url, true);
+  var uri = request.pathname;
+  var symbol = "USSLIND";
+  if ("sym" in request.query) {
+    symbol = request.query.sym;
+  }
+  
   console.log('serve: ' + uri);
 
   if (uri === '/fred') {
@@ -16,7 +22,7 @@ function onRequest(client_req, client_res) {
     var options = {
       hostname: 'api.stlouisfed.org',
       port: 80,
-      path: "/fred/series/observations?series_id=USSLIND&api_key=" + key.api_key + "&file_type=json",
+      path: "/fred/series/observations?series_id=" + symbol + "&api_key=" + key.api_key + "&file_type=json",
       method: 'GET'
     };
 
