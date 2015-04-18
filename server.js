@@ -38,7 +38,7 @@ function onRequest(client_req, client_res) {
   }
   else {
     if (uri === '/') {
-      uri = '/us-leading-index.html';
+      uri = '/dashboard.html';
     }
     var filename = path.join(process.cwd(), uri);
     fs.exists(filename, function(exists) {

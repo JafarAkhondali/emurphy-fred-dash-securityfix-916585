@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet/less" type="text/css" href="../metro.css/less/metroblog.less" />
+    <style>
+    .axis {
+        font: 0.7em arial;
+    }
+    path {
+        fill:none;
+        stroke:black;
+        stroke-width:2px;
+    }
+    .tick {
+        fill:none;
+        stroke:black;
+    }
+    .line {
+        stroke:steelblue;
+        opacity:50;
+    }
+     
+    </style>
+    <script src="http://mbostock.github.com/d3/d3.js?2.3.0"></script>
+    <title>FRED dashboard</title>
+</head>
+<body>
+    <script>
+        var margin = 40,
+            width = 700 - margin,
+            height = 300 - margin;
+        
+        var parse = d3.time.format("%Y-%m-%d").parse;                
+                    
+        function draw(data, elemId) {
+            data.forEach(function(d) {
+                d.date = parse(d.date);
+            });
+        
+            var y= d3.scale.linear()
+                .domain(d3.extent(data,function (d) {return parseFloat(d.value);}))
+                .range([height,margin]);
+            
+            var x = d3.time.scale()
+                .domain([data[0].date, data[data.length - 1].date])
+                .range([margin,width]);
+
+            var y_axis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+
+            var x_axis = d3.svg.axis()
+                .scale(x);
+                            
+            var line = d3.svg.line()
+                .x(function (d) {return x(d.date);})
+                .y(function (d) {return y(d.value);});
+            
+            var zeroline = d3.svg.line()
+                .x(function (d) {return x(d.date);})
+                .y(function (d) {return y(0);});
+                                
+            d3.select(elemId).select("svg")
+               .remove();
+
+            d3.select(elemId)
+                .append("svg")
+                    .attr("class","chart")
+                    .attr("width", width+margin)
+                    .attr("height", height+margin);                
+            
+            var e = d3.select(elemId).select("svg");
+            
+            e.append("path")
+                    .attr("class", "line");
+                
+            function addpoints(k) {
+                e.select("path")
+                .attr("d", function() { return line(data.slice(0, k + 1)); });
+            };
+            
+            var k = 1, n = data.length, interval = Math.max(1,Math.round(n/50));
+            d3.timer(function() {
+                addpoints(k);
+                if ((k += interval) >= n - 1) {
+                    addpoints(n - 1);
+                    return true;
+                }
+            });
+
+            if (d3.min(data,function (d) {return parseFloat(d.value);}) < 0) {
+                 d3.select(elemId).select("svg")
+                    .append("path")
+                        .attr("class", "line")
+                        .style("stroke", "gray")
+                        .style("opacity", "60")
+                        .attr("d", zeroline(data));
+            }
+
+            d3.select(elemId).select("svg")
+                .append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                //.attr("transform", "translate(0," + (height + margin)/2 + ")")
+                .call(x_axis);
+            
+            d3.select(elemId).select("svg")
+                .append("g")
+                .attr("class", "y axis")
+                .attr("transform", "translate(" + margin + ",0)")
+                .call(y_axis);
+            
+            d3.select('.y.axis')
+                .append('text')
+                //.text('Y Axis Label')
+                .attr('transform', "rotate (90, " + -margin + ", 0)")
+                .attr('x', 90)
+                .attr('y', 0);   
+            
+            d3.select(elemId).select('svg')
+                .append('text')
+                    .text('Source: Federal Reserve Bank of St. Louis')  
+                    .attr("transform", "translate(" + width / 1.6 + "," + (height + margin) + ")");
+        }
+        function getData(sym, elemId) {
+            d3.json("http://localhost:3050/fred?sym=" + sym, function(data){
+                draw(data.observations, elemId);                
+            });
+        }
+
+    </script>
+    <header><h3>Leading Index for the United States</h3></header>
+        <div id="leading-index">
+            <script>
+                getData("USSLIND", "#leading-index");
+            </script>
+        </div>        
+    <header><h3>Cleveland Financial Stress Index</h3></header>
+    <div id="financial-stress">
+        <script>
+            getData("STLFSI", "#financial-stress");
+        </script>
+    </div>
+    <!-- header><h3>S&P 500</h3></header> 
+    <div id="sp500">
+        <script>
+            getData("SP500", "#sp500");
+        </script>
+    </div -->
+    <!-- header><h3>Composite Index of 12 Leading Indicators</h3></header> 
+    <div id="composite-LI">
+        <script>
+            getData("M16072USM351SNBR", "#composite-LI");
+        </script>
+    </div -->
+    <!-- header><h3>Smoothed U.S. Recession Probabilities</h3></header> 
+    <div id="recession-probabilities">
+        <script>
+            getData("M16072USM351SNBR", "#recession-probabilities");
+        </script>
+    </div -->    
+
+</body>
+</html>
+
