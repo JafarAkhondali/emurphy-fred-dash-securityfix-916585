@@ -31,11 +31,9 @@
             width = 700 - margin,
             height = 300 - margin;
         
-        var parse = d3.time.format("%Y-%m-%d").parse;                
-                    
-        function draw(data, elemId) {
+        function draw(data, elemId, date_parse) {
             data.forEach(function(d) {
-                d.date = parse(d.date);
+                d.date = date_parse(d.date);
             });
         
             var y= d3.scale.linear()
@@ -124,18 +122,31 @@
                     .attr("transform", "translate(" + width / 1.6 + "," + (height + margin) + ")");
         }
         function getData(sym, elemId) {
-            d3.json("http://localhost:3050/fred?sym=" + sym, function(data){
-                draw(data.observations, elemId);                
+            var path = 'fred?sym=' + sym;
+            var parse = d3.time.format("%Y-%m-%d").parse;
+            if (sym === 'sp_pe10') {
+                path = sym;
+                parse = d3.time.format("%Y.%m").parse;
+            }
+
+            d3.json("http://localhost:3050/" + path, function(data){
+                draw(data.observations, elemId, parse);
             });
         }
 
     </script>
+    <header><h3>S&P Price-to-Earnings Ratio (PE10 or CAPE)</h3></header>
+    <div id="sp-pe10">
+        <script>
+            getData("sp_pe10", "#sp-pe10");
+        </script>
+    </div>
     <header><h3>Leading Index for the United States</h3></header>
-        <div id="leading-index">
-            <script>
-                getData("USSLIND", "#leading-index");
-            </script>
-        </div>        
+    <div id="leading-index">
+        <script>
+            getData("USSLIND", "#leading-index");
+        </script>
+    </div>
     <header><h3>Cleveland Financial Stress Index</h3></header>
     <div id="financial-stress">
         <script>

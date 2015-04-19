@@ -36,6 +36,12 @@ function onRequest(client_req, client_res) {
       end: true
     });
   }
+  else if (uri === '/sp_pe10') {
+    var shiller_sp = require('./shiller_sp.js');
+    client_res.writeHead(200, {'Content-Type':"application/json"});
+    var data = shiller_sp.sp_pe10();
+    client_res.write(JSON.stringify(shiller_sp.sp_pe10()));
+  }
   else {
     if (uri === '/') {
       uri = '/dashboard.html';
