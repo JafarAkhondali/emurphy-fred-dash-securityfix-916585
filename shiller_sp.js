@@ -13,7 +13,7 @@ module.exports.sp_pe10 = function () {
         var pe_ratio = worksheet['K' + i];
 
         if (typeof date !== 'undefined' && typeof pe_ratio !== 'undefined') {
-            series.observations.push({date: date.v, value: pe_ratio.v});
+            series.observations.push({date: date.v.toString(), value: pe_ratio.v});
         }
         series.count = series.observations.length;
     }

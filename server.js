@@ -36,26 +36,24 @@ function onRequest(client_req, client_res) {
       end: true
     });
   }
-  else if (uri === '/sp_pe10') {
-    var shiller_sp = require('./shiller_sp.js');
-    client_res.writeHead(200, {'Content-Type':"application/json"});
-    var data = shiller_sp.sp_pe10();
-    client_res.write(JSON.stringify(shiller_sp.sp_pe10()));
-  }
   else {
     if (uri === '/') {
       uri = '/dashboard.html';
     }
     var filename = path.join(process.cwd(), uri);
     fs.exists(filename, function(exists) {
-        if(!exists) {
+        if(!exists || uri == '/fred-key.json') {
             console.log("not exists: " + filename);
             client_res.writeHead(404, {'Content-Type': 'text/plain'});
             client_res.write('404 Not Found\n');
             client_res.end();
             return;
         }
-        client_res.writeHead(200, {'Content-Type':"text/html"});
+        var mimeType = "text/html";
+        if (uri.slice(-5) == '.json') {
+            mimeType = "application/json";
+        }
+        client_res.writeHead(200, {'Content-Type': mimeType});
 
         var fileStream = fs.createReadStream(filename);
         fileStream.pipe(client_res);

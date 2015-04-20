@@ -125,7 +125,7 @@
             var path = 'fred?sym=' + sym;
             var parse = d3.time.format("%Y-%m-%d").parse;
             if (sym === 'sp_pe10') {
-                path = sym;
+                path = sym + '.json';
                 parse = d3.time.format("%Y.%m").parse;
             }
 
