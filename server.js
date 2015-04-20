@@ -22,6 +22,7 @@ function onRequest(client_req, client_res) {
     var options = {
       hostname: 'api.stlouisfed.org',
       port: 80,
+      //path: "/fred/series/observations?series_id=" + symbol + "&api_key=" + key.api_key + "&file_type=json&observation_start=1993-12-31",
       path: "/fred/series/observations?series_id=" + symbol + "&api_key=" + key.api_key + "&file_type=json",
       method: 'GET'
     };
