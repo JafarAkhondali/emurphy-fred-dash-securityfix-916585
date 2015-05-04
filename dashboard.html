@@ -30,7 +30,41 @@
         var margin = 40,
             width = 700 - margin,
             height = 300 - margin;
-        
+
+        function drawRecessions(recessions, elem, date_parse, x, y) {
+            elem.selectAll("rect")
+                    .data(recessions)
+                    .enter()
+                    .append("rect")
+                    .attr("x", function (d, i) {
+                        // var width = x(d.troughDate) - x(d.peakDate);
+                        //return i + width;
+                        if (!d.peakDate) {
+                            d.peakDate = date_parse(d.peak);
+                            d.troughDate = date_parse(d.trough);
+                        }
+                        if (isNaN(x(d.peakDate))) {
+                            return 0;
+                        } else {
+                            return x(d.peakDate);
+                        }
+                    })
+                    .attr("y", 0)
+                    .attr("width", function (d) {
+                        if (!d.peakDate) {
+                            d.peakDate = date_parse(d.peak);
+                            d.troughDate = date_parse(d.trough);
+                        }
+                        if (isNaN(x(d.peakDate))) {
+                            return 0;
+                        } else {
+                            return x(d.troughDate) - x(d.peakDate);
+                        }
+                    })
+                    .attr("height", height)
+                    .attr("fill", "#F0F0F0");
+        }
+
         function draw(data, elemId, date_parse) {
             data.forEach(function(d) {
                 d.date = date_parse(d.date);
@@ -58,7 +92,7 @@
             var zeroline = d3.svg.line()
                 .x(function (d) {return x(d.date);})
                 .y(function (d) {return y(0);});
-                                
+
             d3.select(elemId).select("svg")
                .remove();
 
@@ -69,7 +103,12 @@
                     .attr("height", height+margin);                
             
             var e = d3.select(elemId).select("svg");
-            
+
+            d3.json("http://localhost:3050/recessions.json", function(data){
+                var parse = d3.time.format("%Y-%m-%d").parse;
+                drawRecessions(data, e, parse, x, y);
+            });
+
             e.append("path")
                     .attr("class", "line");
                 
