@@ -49,20 +49,22 @@
                             return x(d.peakDate);
                         }
                     })
-                    .attr("y", 0)
+                    .attr("y", margin)
                     .attr("width", function (d) {
                         if (!d.peakDate) {
                             d.peakDate = date_parse(d.peak);
                             d.troughDate = date_parse(d.trough);
                         }
-                        if (isNaN(x(d.peakDate))) {
+                        var start_x = x(d.peakDate);
+                        if (isNaN(start_x) || start_x < margin) {
                             return 0;
                         } else {
-                            return x(d.troughDate) - x(d.peakDate);
+                            return x(d.troughDate) - start_x;
                         }
                     })
-                    .attr("height", height)
-                    .attr("fill", "#F0F0F0");
+                    .attr("height", height - margin)
+                    .attr("fill", "grey")
+                    .attr("opacity", 0.1);
         }
 
         function draw(data, elemId, date_parse) {
@@ -131,7 +133,7 @@
                     .append("path")
                         .attr("class", "line")
                         .style("stroke", "gray")
-                        .style("opacity", "60")
+                        .style("opacity", "1.0")
                         .attr("d", zeroline(data));
             }
 
