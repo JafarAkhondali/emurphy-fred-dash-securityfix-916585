@@ -29,7 +29,7 @@
     .bullet .subtitle { fill: #999; }
 
 </style>
-<button>Update</button>
+<!-- button>Update</button -->
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="bullet.js"></script>
 <script>
@@ -66,9 +66,9 @@
                 .attr("dy", "1em")
                 .text(function(d) { return d.subtitle; });
 
-        d3.selectAll("button").on("click", function() {
+        /*d3.selectAll("button").on("click", function() {
             svg.datum(randomize).call(chart.duration(1000)); // TODO automatic transition
-        });
+        });*/
     });
 
     function randomize(d) {

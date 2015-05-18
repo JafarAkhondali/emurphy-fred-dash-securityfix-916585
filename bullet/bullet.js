@@ -20,16 +20,17 @@
         var rangez = ranges.call(this, d, i).slice().sort(d3.descending),
           markerz = markers.call(this, d, i).slice().sort(d3.descending),
           measurez = measures.call(this, d, i).slice().sort(d3.descending),
+          xstart = Math.min(0, rangez[rangez.length - 1]),
           g = d3.select(this);
 
         // Compute the new x-scale.
         var x1 = d3.scale.linear()
-          .domain([0, Math.max(rangez[0], markerz[0], measurez[0])])
-          .range(reverse ? [width, 0] : [0, width]);
+          .domain([xstart, Math.max(rangez[0], markerz[0], measurez[0])])
+          .range(reverse ? [width, xstart] : [xstart, width]);
 
         // Retrieve the old x-scale, if this is an update.
         var x0 = this.__chart__ || d3.scale.linear()
-            .domain([0, Infinity])
+            .domain([xstart, Infinity])
             .range(x1.range());
 
         // Stash the new scale.
@@ -47,15 +48,15 @@
           .attr("class", function(d, i) { return "range s" + i; })
           .attr("width", w0)
           .attr("height", height)
-          .attr("x", reverse ? x0 : 0)
+          .attr("x", reverse ? x0 : xstart)
           .transition()
           .duration(duration)
           .attr("width", w1)
-          .attr("x", reverse ? x1 : 0);
+          .attr("x", reverse ? x1 : xstart);
 
         range.transition()
           .duration(duration)
-          .attr("x", reverse ? x1 : 0)
+          .attr("x", reverse ? x1 : xstart)
           .attr("width", w1)
           .attr("height", height);
 
@@ -67,18 +68,18 @@
           .attr("class", function(d, i) { return "measure s" + i; })
           .attr("width", w0)
           .attr("height", height / 3)
-          .attr("x", reverse ? x0 : 0)
+          .attr("x", reverse ? x0 : xstart)
           .attr("y", height / 3)
           .transition()
           .duration(duration)
           .attr("width", w1)
-          .attr("x", reverse ? x1 : 0);
+          .attr("x", reverse ? x1 : xstart);
 
         measure.transition()
           .duration(duration)
           .attr("width", w1)
           .attr("height", height / 3)
-          .attr("x", reverse ? x1 : 0)
+          .attr("x", reverse ? x1 : xstart)
           .attr("y", height / 3);
 
         // Update the marker lines.
