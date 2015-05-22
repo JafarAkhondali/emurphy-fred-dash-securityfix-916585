@@ -72,8 +72,10 @@
                 d.date = date_parse(d.date);
             });
         
+            var extent = d3.extent(data,function (d) {return parseFloat(d.value);});
+
             var y= d3.scale.linear()
-                .domain(d3.extent(data,function (d) {return parseFloat(d.value);}))
+                .domain(extent[0] <= 0 ? extent : [0, extent[1]])
                 .range([height,margin]);
             
             var x = d3.time.scale()
