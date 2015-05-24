@@ -67,7 +67,29 @@
                     .attr("opacity", 0.3);
         }
 
-        function draw(data, elemId, date_parse) {
+        function drawBullBearRanges(elem, bullRange, bearRange, x, y) {
+            appendRange(elem.selectAll("rect")
+                                .data([null])
+                                .enter(), bullRange, "LightGreen", x, y);
+            appendRange(elem, bearRange, "pink", x, y);
+
+        }
+
+        function appendRange(elem, range, color, x, y) {
+                elem.append("rect")
+                    .attr("y", function (d, i) {
+                        return y(range[1]);
+                    })
+                    .attr("x", margin)
+                    .attr("width", width - margin)
+                    .attr("height", function (d) {
+                        return y(range[0]) - y(range[1]);
+                    })
+                    .attr("fill", color)
+                    .attr("opacity", 0.3);
+        }
+
+        function draw(data, elemId, date_parse, bearRange, bullRange) {
             data.forEach(function(d) {
                 d.date = date_parse(d.date);
             });
@@ -112,6 +134,10 @@
                 var parse = d3.time.format("%Y-%m-%d").parse;
                 drawRecessions(data, e, parse, x, y);
             });
+
+            if (typeof bearRange !== 'undefined' && typeof bullRange !== 'undefined') {
+                drawBullBearRanges(e, bearRange, bullRange, x, y);
+            }
 
             e.append("path")
                     .attr("class", "line");
@@ -164,7 +190,7 @@
                     .text('Source: Federal Reserve Bank of St. Louis')  
                     .attr("transform", "translate(" + width / 1.6 + "," + (height + margin) + ")");
         }
-        function getData(sym, elemId) {
+        function getData(sym, elemId, bullRange, bearRange) {
             var path = 'fred?sym=' + sym;
             var parse = d3.time.format("%Y-%m-%d").parse;
             if (sym === 'sp_pe10') {
@@ -173,7 +199,7 @@
             }
 
             d3.json("http://localhost:3050/" + path, function(data){
-                draw(data.observations, elemId, parse);
+                draw(data.observations, elemId, parse, bullRange, bearRange);
             });
         }
 
@@ -181,7 +207,7 @@
     <header><h3>S&P Price-to-Earnings Ratio (PE10 or CAPE)</h3></header>
     <div id="sp-pe10">
         <script>
-            getData("sp_pe10", "#sp-pe10");
+            getData("sp_pe10", "#sp-pe10", [0,10], [20,45]);
         </script>
     </div>
     <header><h3>Leading Index for the United States</h3></header>
