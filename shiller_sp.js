@@ -28,13 +28,13 @@ module.exports.sp_all = function (start_year, start_month) {
 
     var worksheet = workbook.Sheets["Data"];
 
-    var series = {observations: []};
+    var series = []
     for (i = 129; i < 2500; i++) {
         var date = worksheet['A' + i];
 
         if (typeof date !== 'undefined') {
             if (typeof start_year === 'undefined' || date_after(start_year, start_month, date.v)) {
-                series.observations.push({date: format_date(date.v.toString()),
+                series.push({date: format_date(date.v.toString()),
                                           price: cell_value(worksheet, 'B', i), dividend: cell_value(worksheet, 'C', i),
                                           earnings: cell_value(worksheet, 'D', i), CPI: cell_value(worksheet, 'E', i),
                                           treasury_10yr_rate: cell_value(worksheet, 'G', i),
@@ -44,10 +44,21 @@ module.exports.sp_all = function (start_year, start_month) {
                                           pe10_ratio: cell_value(worksheet, 'K', i)});
             }
         }
-        series.count = series.observations.length;
     }
     return series;
 };
+
+module.exports.pe10_ratio = function(sp_price, sp_all) {
+  var sum = 0;
+  for( var i = sp_all.length - 121; i < sp_all.length; i++ ){
+    if (sp_all[i].real_earnings) {
+      sum += sp_all[i].real_earnings;
+    }
+  }
+
+  var avg = sum/120;
+  return sp_price / avg;
+}
 
 function cell_value(worksheet, column, row) {
     var cell = worksheet[column + row];
