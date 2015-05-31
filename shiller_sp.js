@@ -1,13 +1,22 @@
 var XLSX = require('xlsx'),
-    path = require('path');
+    path = require('path'),
+    http = require('http'),
+    key = require('./fred-key.json');
 
-module.exports.sp_pe10 = function (start_year, start_month) {
+Date.prototype.yyyymmdd = function() {
+  var yyyy = this.getFullYear().toString();
+  var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
+  var dd  = this.getDate().toString();
+  return yyyy + '-' + (mm[1]?mm:"0"+mm[0]) + '-' + (dd[1]?dd:"0"+dd[0]); // padding
+};
+
+module.exports.sp_pe10 = function (callback, start_year, start_month) {
 
     var workbook = XLSX.readFile(path.join(process.cwd(), 'data/shiller_sp_earnings_data.xls'));
 
     var worksheet = workbook.Sheets["Data"];
 
-    var series = {observations: []};
+    var series = {observations: [], latest: null};
     for (i = 129; i < 2500; i++) {
         var date = worksheet['A' + i];
         var pe_ratio = worksheet['K' + i];
@@ -19,6 +28,12 @@ module.exports.sp_pe10 = function (start_year, start_month) {
         }
         series.count = series.observations.length;
     }
+
+    pe10_ratio_latest(this.sp_all(start_year, start_month), function(date, value) {
+      series.latest = {date: date, value: value};
+      callback(series);
+    });
+
     return series;
 };
 
@@ -48,7 +63,7 @@ module.exports.sp_all = function (start_year, start_month) {
     return series;
 };
 
-module.exports.pe10_ratio = function(sp_price, sp_all) {
+function pe10_ratio(sp_price, sp_all) {
   var sum = 0;
   for( var i = sp_all.length - 121; i < sp_all.length; i++ ){
     if (sp_all[i].real_earnings) {
@@ -58,6 +73,20 @@ module.exports.pe10_ratio = function(sp_price, sp_all) {
 
   var avg = sum/120;
   return sp_price / avg;
+}
+
+function pe10_ratio_latest(sp_all, callback) {
+  var today = new Date();
+  var lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+
+  http.get("http://api.stlouisfed.org/fred/series/observations?series_id=sp500&api_key=" + key.api_key +
+           "&file_type=json&sort_order=desc&observation_start=" + lastWeek.yyyymmdd(), function(response) {
+    response.on('data', function (chunk) {
+      var series = JSON.parse(chunk);
+      var pe10 = pe10_ratio(series.observations[0].value, sp_all)
+      callback(series.observations[0].date, pe10);
+    });
+  });
 }
 
 function cell_value(worksheet, column, row) {

@@ -89,7 +89,7 @@
                     .attr("opacity", 0.3);
         }
 
-        function draw(data, elemId, date_parse, bearRange, bullRange) {
+        function draw(data, elemId, date_parse, bearRange, bullRange, latest) {
             data.forEach(function(d) {
                 d.date = date_parse(d.date);
             });
@@ -189,6 +189,13 @@
                 .append('text')
                     .text('Source: Federal Reserve Bank of St. Louis')  
                     .attr("transform", "translate(" + width / 1.6 + "," + (height + margin) + ")");
+
+            if (latest && typeof latest !== 'undefined') {
+                // console.log("As of " + latest.date + ": " + latest.value);
+                d3.select(elemId)
+                        .append('text')
+                        .text(Math.round(latest.value * 100) / 100 + " as of " + latest.date);
+            }
         }
         function getData(sym, elemId, bullRange, bearRange) {
             var path = 'fred?sym=' + sym;
@@ -199,7 +206,7 @@
             }
 
             d3.json("http://localhost:3050/" + path, function(data){
-                draw(data.observations, elemId, parse, bullRange, bearRange);
+                draw(data.observations, elemId, parse, bullRange, bearRange, data.latest);
             });
         }
 
@@ -208,6 +215,9 @@
     <div id="sp-pe10">
         <script>
             getData("sp_pe10", "#sp-pe10", [0,10], [20,45]);
+            //d3.json("http://localhost:3050/fred/today?sym=sp500", function(data) {
+            //  console.log("Last price: " + data.observations[0].value + " on " + data.observations[0].date);
+            //});
         </script>
     </div>
     <header><h3>Leading Index for the United States</h3></header>
