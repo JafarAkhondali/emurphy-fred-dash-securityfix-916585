@@ -187,8 +187,8 @@
 
         d3.select(elemId).select('svg')
                 .append('text')
-                .text('Source: Federal Reserve Bank of St. Louis')
-                .attr("transform", "translate(" + width / 1.6 + "," + (height + margin) + ")");
+                .text('Sources: Robert Shiller, Crestmont Research and Federal Reserve Bank of St. Louis')
+                .attr("transform", "translate(" + width / 5 + "," + (height + margin - 2) + ")");
 
         if (latest && typeof latest !== 'undefined') {
             // console.log("As of " + latest.date + ": " + latest.value);
