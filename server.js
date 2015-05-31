@@ -39,7 +39,7 @@ function onRequest(client_req, client_res) {
   }
   else {
     if (uri === '/') {
-      uri = '/dashboard.html';
+      uri = '/pe10.html';
     }
     var filename = path.join(process.cwd(), uri);
     fs.exists(filename, function(exists) {
