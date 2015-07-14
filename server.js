@@ -1,4 +1,5 @@
-var http = require('http'), 
+var http = require('http'),
+    https = require('https'),
     url = require('url'), 
     path = require('path'), 
     fs = require('fs');
@@ -21,13 +22,13 @@ function onRequest(client_req, client_res) {
 
     var options = {
       hostname: 'api.stlouisfed.org',
-      port: 80,
+      port: 443,
       //path: "/fred/series/observations?series_id=" + symbol + "&api_key=" + key.api_key + "&file_type=json&observation_start=1993-12-31",
       path: "/fred/series/observations?series_id=" + symbol + "&api_key=" + key.api_key + "&file_type=json",
       method: 'GET'
     };
 
-    var proxy = http.request(options, function (res) {
+    var proxy = https.request(options, function (res) {
       res.pipe(client_res, {
         end: true
       });

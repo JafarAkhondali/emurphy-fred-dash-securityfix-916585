@@ -1,6 +1,7 @@
 var XLSX = require('xlsx'),
     path = require('path'),
     http = require('http'),
+    https = require('https'),
     key = require('./fred-key.json');
 
 Date.prototype.yyyymmdd = function() {
@@ -79,7 +80,7 @@ function pe10_ratio_latest(sp_all, callback) {
   var today = new Date();
   var lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
 
-  http.get("http://api.stlouisfed.org/fred/series/observations?series_id=sp500&api_key=" + key.api_key +
+  https.get("https://api.stlouisfed.org/fred/series/observations?series_id=sp500&api_key=" + key.api_key +
            "&file_type=json&sort_order=desc&observation_start=" + lastWeek.yyyymmdd(), function(response) {
     response.on('data', function (chunk) {
       var series = JSON.parse(chunk);
