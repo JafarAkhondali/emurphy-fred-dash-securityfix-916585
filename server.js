@@ -9,6 +9,11 @@ http.createServer(onRequest).listen(3050);
 function onRequest(client_req, client_res) {
   var request = url.parse(client_req.url, true);
   var uri = request.pathname;
+    if (path.normalize(decodeURI(uri)) !== decodeURI(uri)) {
+        client_res.statusCode = 403;
+        client_res.end();
+        return;
+    }
   var symbol = "USSLIND";
   if ("sym" in request.query) {
     symbol = request.query.sym;
